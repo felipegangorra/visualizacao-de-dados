@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab6-Projeto2-FelipeGangorra</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 18px; background:#fafafa; color:#222 }
+    h1 { text-align:center; font-size:20px; margin-bottom:8px }
+    #chart { width:100%; max-width:1100px; height:620px; margin: 0 auto; background: #fff; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    footer { max-width:1100px; margin:16px auto; font-size:13px; color:#666 }
+    #filter { max-width:1100px; margin:10px auto; font-size:13px; color:#444; }
+    input { margin-left:6px; width:80px; }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <div id="filter">
+    Filtrar variação (mm) entre: 
+    <input type="number" id="minVar" placeholder="mínimo" /> e 
+    <input type="number" id="maxVar" placeholder="máximo" />
+    <button id="applyFilter">Aplicar filtro</button>
+  </div>
+  <footer>Interações disponíveis: Tooltip, Zoom (slider e scroll/arraste), filtro de variação, salvar como imagem.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    const yearStart = 2015;
+    const yearEnd = 2024;
+
+    // Dados do dataset
+    const csvData = [
+      { ano: 2013, total_chuva_mm: 280 },
+      { ano: 2014, total_chuva_mm: 404.6 },
+      { ano: 2015, total_chuva_mm: 386.7 },
+      { ano: 2016, total_chuva_mm: 295 },
+      { ano: 2017, total_chuva_mm: 211.5 },
+      { ano: 2018, total_chuva_mm: 764.8 },
+      { ano: 2019, total_chuva_mm: 497.9 },
+      { ano: 2020, total_chuva_mm: 591.3 },
+      { ano: 2021, total_chuva_mm: 388.5 },
+      { ano: 2022, total_chuva_mm: 938.6 },
+      { ano: 2023, total_chuva_mm: 465.6 },
+      { ano: 2024, total_chuva_mm: 378.2 },
+      { ano: 2025, total_chuva_mm: 489.1 }
+    ];
+
+    function formatNumberBR(n) {
+      return Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    }
+
+    // Calcula a variação anual
+    function calculateVariation(data) {
+      const map = {};
+      const sorted = data.slice().sort((a,b)=>a.ano - b.ano);
+      for (let i=0; i<sorted.length; i++) {
+        const y = sorted[i].ano;
+        if (y >= yearStart && y <= yearEnd) {
+          const prev = sorted[i-1] ? sorted[i-1].total_chuva_mm : null;
+          map[y] = prev !== null ? sorted[i].total_chuva_mm - prev : 0;
+        }
+      }
+      return map;
+    }
+
+    function loadAndRender(filterMin=null, filterMax=null) {
+      const variationMap = calculateVariation(csvData);
+      const years = [];
+      const variations = [];
+
+      for (let y = yearStart; y <= yearEnd; y++) {
+        const val = variationMap[y];
+        if (val !== undefined) {
+          // aplica filtro se definido
+          if ((filterMin === null || val >= filterMin) && (filterMax === null || val <= filterMax)) {
+            years.push(String(y));
+            variations.push(Number(val.toFixed(1)));
+          }
+        }
+      }
+
+      renderChart(years, variations);
+    }
+
+    function renderChart(years, variations) {
+      const el = document.getElementById('chart');
+      const chart = echarts.init(el);
+
+      const option = {
+        title: {
+          text: 'Variação da chuva acumulada por ano (2015 a 2024) - Fazenda Carnaúba - Taperoá - PB',
+          left: 'center',
+          top: 14,
+          textStyle: { fontSize: 16 }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: function(params) {
+            const p = params[0];
+            const sign = p.data >= 0 ? '+' : '';
+            return '<b>' + p.axisValue + '</b><br/>Variação: ' + sign + formatNumberBR(p.data) + ' mm';
+          }
+        },
+        toolbox: {
+          show: true,
+          right: 18,
+          feature: { saveAsImage: { title: 'Salvar como imagem' } }
+        },
+        grid: { left: '8%', right: '6%', bottom: '12%', top: 70 },
+        xAxis: {
+          type: 'category',
+          data: years,
+          axisLabel: { fontSize: 14 }
+        },
+        yAxis: {
+          type: 'value',
+          name: 'mm',
+          nameLocation: 'end',
+          nameGap: 10,
+          axisLabel: { formatter: '{value} mm' }
+        },
+        dataZoom: [
+          { type: 'slider', start: 0, end: 100, bottom: 6 },
+          { type: 'inside', start: 0, end: 100 }
+        ],
+        series: [
+          {
+            name: 'Variação (mm)',
+            type: 'bar',
+            data: variations,
+            barWidth: '48%',
+            emphasis: { focus: 'series' },
+            itemStyle: {
+              color: function(params) {
+                return params.data >= 0 
+                  ? new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                      { offset: 0, color: '#2b99ff' },
+                      { offset: 1, color: '#5ed0ff' }
+                    ])
+                  : new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                      { offset: 0, color: '#ff4c4c' },
+                      { offset: 1, color: '#ff9999' }
+                    ]);
+              }
+            }
+          }
+        ]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    // Filtro de variação
+    document.getElementById('applyFilter').addEventListener('click', () => {
+      const min = document.getElementById('minVar').value;
+      const max = document.getElementById('maxVar').value;
+      const minVal = min ? parseFloat(min) : null;
+      const maxVal = max ? parseFloat(max) : null;
+      loadAndRender(minVal, maxVal);
+    });
+
+    // carregar inicialmente sem filtro
+    loadAndRender();
+  </script>
+</body>
+</html>
