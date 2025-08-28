@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab6-FelipeGangorra</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 18px; background:#fafafa; color:#222 }
+    h1 { text-align:center; font-size:20px; margin-bottom:8px }
+    #chart { width:100%; max-width:1100px; height:620px; margin: 0 auto; background: #fff; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    footer { max-width:1100px; margin:16px auto; font-size:13px; color:#666 }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <footer>Interações disponíveis: Tooltip, Zoom (slider e zoom por scroll/arraste), salvar como imagem.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    // ===================== CONFIGURAÇÃO =====================
+    const yearStart = 2015;
+    const yearEnd = 2024;
+
+    // Dados do dataset
+    const csvData = [
+      { ano: 2013, total_chuva_mm: 280, dias_chuva_mais_5mm: 14, dias_chuva_mais_10mm: 9 },
+      { ano: 2014, total_chuva_mm: 404.6, dias_chuva_mais_5mm: 18, dias_chuva_mais_10mm: 15 },
+      { ano: 2015, total_chuva_mm: 386.7, dias_chuva_mais_5mm: 16, dias_chuva_mais_10mm: 9 },
+      { ano: 2016, total_chuva_mm: 295, dias_chuva_mais_5mm: 17, dias_chuva_mais_10mm: 10 },
+      { ano: 2017, total_chuva_mm: 211.5, dias_chuva_mais_5mm: 11, dias_chuva_mais_10mm: 5 },
+      { ano: 2018, total_chuva_mm: 764.8, dias_chuva_mais_5mm: 28, dias_chuva_mais_10mm: 21 },
+      { ano: 2019, total_chuva_mm: 497.9, dias_chuva_mais_5mm: 25, dias_chuva_mais_10mm: 16 },
+      { ano: 2020, total_chuva_mm: 591.3, dias_chuva_mais_5mm: 19, dias_chuva_mais_10mm: 11 },
+      { ano: 2021, total_chuva_mm: 388.5, dias_chuva_mais_5mm: 19, dias_chuva_mais_10mm: 11 },
+      { ano: 2022, total_chuva_mm: 938.6, dias_chuva_mais_5mm: 37, dias_chuva_mais_10mm: 24 },
+      { ano: 2023, total_chuva_mm: 465.6, dias_chuva_mais_5mm: 18, dias_chuva_mais_10mm: 16 },
+      { ano: 2024, total_chuva_mm: 378.2, dias_chuva_mais_5mm: 21, dias_chuva_mais_10mm: 14 },
+      { ano: 2025, total_chuva_mm: 489.1, dias_chuva_mais_5mm: 27, dias_chuva_mais_10mm: 17 }
+    ];
+
+    function formatNumberBR(n) {
+      return Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    }
+
+    function aggregateData(data) {
+      const map = {};
+      for (const r of data) {
+        const y = r.ano;
+        const t = r.total_chuva_mm;
+        if (y >= yearStart && y <= yearEnd && !isNaN(t)) map[y] = t;
+      }
+      return map;
+    }
+
+    function loadAndRender() {
+      const aggregated = aggregateData(csvData);
+
+      const years = [];
+      const totals = [];
+      for (let y = yearStart; y <= yearEnd; y++) {
+        years.push(String(y));
+        totals.push(aggregated[y] !== undefined ? Number(aggregated[y].toFixed(1)) : 0);
+      }
+
+      renderChart(years, totals);
+    }
+
+    function renderChart(years, totals) {
+      const el = document.getElementById('chart');
+      const chart = echarts.init(el);
+
+      const option = {
+        title: {
+          text: 'Volume de chuva acumulada por ano (2015 a 2024) - Fazenda Carnaúba - Taperoá - PB',
+          left: 'center',
+          top: 14,
+          textStyle: { fontSize: 16 }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: function (params) {
+            const p = params[0];
+            return '<b>' + p.axisValue + '</b><br/>Total: ' + formatNumberBR(p.data) + ' mm';
+          }
+        },
+        toolbox: {
+          show: true,
+          right: 18,
+          feature: { saveAsImage: { title: 'Salvar como imagem' } }
+        },
+        grid: { left: '8%', right: '6%', bottom: '12%', top: 70 },
+        xAxis: {
+          type: 'category',
+          data: years,
+          axisLabel: { fontSize: 14 }
+        },
+        yAxis: {
+          type: 'value',
+          name: 'mm',
+          nameLocation: 'end',
+          nameGap: 10,
+          axisLabel: { formatter: '{value} mm' }
+        },
+        dataZoom: [
+          { type: 'slider', start: 0, end: 100, bottom: 6 },
+          { type: 'inside', start: 0, end: 100 }
+        ],
+        series: [
+          {
+            name: 'Total (mm)',
+            type: 'bar',
+            data: totals,
+            barWidth: '48%',
+            emphasis: { focus: 'series' },
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#2b99ff' },
+                { offset: 1, color: '#5ed0ff' }
+              ])
+            }
+          }
+        ]
+      };
+
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    loadAndRender();
+  </script>
+</body>
+</html>
