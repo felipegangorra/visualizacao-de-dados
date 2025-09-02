@@ -60,9 +60,6 @@
     $.getJSON('BR-exportacoes_importacoes_2025.json', function(data) {
         mapChart.hideLoading();
 
-        // Registra o mapa do mundo usando o world.js já importado
-        echarts.registerMap('world', echarts.getMap('world').geoJson);
-
         const tipoSelect = document.getElementById('tipoSelect');
         const anoFixo = 2025;
         let anoSelecionado = 2025;
