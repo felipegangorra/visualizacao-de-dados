@@ -1,0 +1,335 @@
+<!--
+	THIS EXAMPLE WAS DOWNLOADED FROM https://echarts.apache.org/examples/en/editor.html?c=geo-choropleth-scatter&code=GYVwdgxgLglg9mABBATgUwIZTQYQBYYpQAUAlIgN4BQiiAboYjBGgDYZgAmASnCAOZ4AMlhhQQnNIgC8iAGwBWANw1EcAA6wEMyqtr80cAFy7aZxAFsM6kwHIA7nBStOtgDR6zKOBgsmoKCBoHua07ABGbCbUoWYAznhw9ibAGKxxwZ7mEHCsTnYAxArFtlmIAL6e5SFmUHC5sDaU1Z50MHEgaQCy1iYA2mUxsWooMGhgUHaJowBeCFBp7mW0EGkQIBGsaP6BmcOIo4KTiAAMNbHhcFB1fqfnoRmjaHEAklxoAB4mZ8uIAPR_SwwMB_KwfJhxRBxdRoCAwYBjTiIDCQx5jOIAOk4WAw9DSQUQn2wEwxvwswO-93MYJMAEY0AoqWZODALOM4vAwCYAExM2jA7gcAzRX60OIATwsl1YAGUYDNtog-ozEABmE4AXV-LX2OQm3lYWxQIv2_LAgrAwtMppWuXyStsBTkcgg3IwClsWptlX2PtCOtCQ1iTjGEymIbmE0WfOQaw2GHCWx2QRjW2Axx--0u1zgt0zwzRzzeki-iFpMYBQJBYIhUJhcIRaCRKKhaCemOxCzxrAJRPGUFJ-3JXLuZIwpfpqpjLLZYA5CEpvwFQsVQeGOTyxodBUkaHCwAA7O5EI7VbSABzc8KuL3DP3me-IDX3QtxfqDX5QcUwuxxVbXNsll1eoUBZMAsDQGVxTibBblsAw4CA4YEOLT5F32cYckkE1TUrAADbk8NrKA8CkGd2U5Jh3nBOBgFbdssRxUVEDqBoYCaXlmIiKJEG5bVpxxd8bT6ABablaQxABOVUABZzxk2kVTkGSMVpVVZLkA9yzLGSFG5VVn2Y0TaUkjETm5c8FDPNx5FVDEtPMhSbN02luTkQzhJE2kDzM89JMk7klIUDFVQPc9zwPE4D15Mt9N0jzTWM0zFOkuQbMUDE5HE89aRObSFE0vyEv2JKMXkyTvKC-yLMi1UlLCyTNRjWhRP01Tz1VNz0uChRL2kySbL8vLuWK4ZjJUySFEU9KVJkg8prqmzZIKg9RtiVqTjKjq_PSuzLM67TdMK29YjWswxDQCwZS_JNrWAzdCmdV13SQrMnEkFAAHUYE4Ei6WaxBLlAtscDtLdTwgMLFFKX0ygDcw13MSsAFFgGAWFYDoNhxRYvB2lrXEIGmDQthIyxrEHYYvx_E8rHUV7QkrGV63hHGUOoli4ChAh0FxqQEOQXN1AQftEHsMQ8D5qF_2wFB6PRZFLixitAWBGDMCRWjkHQURLWRJBgVl8DWEQAWcneqFoMp2J2ZLdDhjpuwGfMTsMCE00KEQcC2TsABBEAYJAZwOFcGyGB7RUZP0ioAc973FVsGUQAAB6D9guGPcOgh5AqY-YuPfATgA5JxU-Drh6GeAIMEz_FI78vObQLn2TxLlAy_TpE0Gg6va4jkwpoqX4TrMR9b3KFRaAscV8EIAcMigAB5TROWIDQtDAUgVEqUBIA3xB0agImAHFDAAKRlRei7Ia1p9nogMQSJIhB8MD-DISfEAAEgxAwSG4Rei8AAqAB9AACr7IBAAJRAABqE8fxXZ_BRAvP4CE_jMDYCHX-hgMQACs4gIGPLvaAlFiAIQvlfcga5YQ8ygJidA_B2iyx6OoYgthMGd2PBQy-Rct6eFQJgbA98SD8OpDPOhGI8aSBfhgN-H9VDlH4TvNAR88CnzgJQ6-W8gA
+	⚠ Please be aware that this chart is not an official demo of Apache ECharts but is made by user-generated code.
+-->
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+  <div style="text-align: right; padding: 10px;">
+    <label for="tipoSelect"></label>
+        <select id="tipoSelect">
+            <option value="EXP">Exportações</option>
+            <option value="IMP">Importações</option>
+            <option value="BAL">Balança Comercial (Exp-Imp)</option>
+        </select>
+    </div>
+    <div id="map-container" style="height: 60%; width: 100%;"></div>
+    <div id="line-container" style="height: 30%; width: 80%; margin: 0 auto;"></div>
+
+  <script type="text/javascript" src="https://echarts.apache.org/en/js/vendors/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script type="text/javascript" src="https://echarts.apache.org/en/dist/world.js"></script>
+  
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://echarts.apache.org/en/js/vendors/echarts-gl/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://echarts.apache.org/en/js/vendors/echarts-stat/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-graph-modularity extension
+  <script type="text/javascript" src="https://echarts.apache.org/en/js/vendors/echarts-graph-modularity/dist/echarts-graph-modularity.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/extension/bmap.min.js"></script>
+  -->
+
+<script type="text/javascript">
+    // Instâncias separadas para cada gráfico
+    var mapChart = echarts.init(document.getElementById('map-container'), null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+    });
+    var lineChart = echarts.init(document.getElementById('line-container'), null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+    });
+
+    mapChart.showLoading();
+
+    $.getJSON('world.json', function (geoJson) {
+        echarts.registerMap('world', geoJson);
+
+        $.getJSON('BR-exportacoes_importacoes_2025.json', function(data) {
+            mapChart.hideLoading();
+
+            const tipoSelect = document.getElementById('tipoSelect');
+            const anoFixo = 2025;
+            let anoSelecionado = 2025;
+
+            function updateMapChart(ano, tipo) {
+                const dataAnual = data[tipo][ano];
+                const chartData = dataAnual
+                    .filter(item => item.name)
+                    .map(item => ({
+                        name: item.name,
+                        value: item.us_value
+                    }));
+
+                let tituloMapa = '';
+                let visualMapColors = [];
+                let visualMapTitle = '';
+                let visualMapMin = 0;
+                let visualMapMax = 0;
+
+                const maxVal = Math.max(...chartData.map(d => Math.abs(d.value || 0)));
+
+                if (tipo === 'EXP') {
+                    tituloMapa = 'Exportações';
+                    visualMapColors = ['#E0F3DE', '#A1D99B', '#41AB5D', '#006D2C'];
+                    visualMapTitle = 'Volume exportado com o país \n (Bilhões de US$)';
+                    visualMapMin = 0;
+                    visualMapMax = maxVal;
+                } else if (tipo === 'IMP') {
+                    tituloMapa = 'Importações';
+                    visualMapColors = ['#fee5d9', '#fcae91', '#fb6a4a', '#cb181d'];
+                    visualMapTitle = 'Volume importado com o país \n (Bilhões de US$)';
+                    visualMapMin = 0;
+                    visualMapMax = maxVal;
+                } else if (tipo === 'BAL') {
+                    tituloMapa = 'Balança Comercial';
+                    visualMapColors = ['#A50026', '#D73027', '#FEE090', '#E0F3DE', '#41AB5D', '#006837'];
+                    visualMapTitle = 'Volume negociado com o país \n (Bilhões de US$)';
+                    
+                    const maxValAbs = Math.max(...chartData.map(d => Math.abs(d.value)));
+                    visualMapMax = maxValAbs;
+                    visualMapMin = -maxValAbs;
+                }
+
+                var mapOption = {
+                    title: {
+                        text: `Volume na ${tituloMapa} do Brasil (Ano ${ano})`,
+                        subtext: 'Dados do Monitor do Comércio Exterior Brasileiro',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            return params.name + '<br/>US$ ' + (params.value ? (params.value / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' bi' : 'Sem dados');
+                        }
+                    },
+                    visualMap: {
+                        orient: 'vertical',
+                        left: 'right',
+                        top: 'center',
+                        min: visualMapMin,
+                        max: visualMapMax,
+                        inRange: {
+                            color: visualMapColors
+                        },
+                        itemHeight: 400,
+                        calculable: true,
+                        text: [visualMapTitle],
+                        textStyle: {
+                            color: '#333',
+                            rotate: 90,
+                            align: 'center',
+                            verticalAlign: 'bottom',
+                            lineHeight: 16
+                        },
+                        formatter: function(value) {
+                            return (value / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+                        }
+                    },
+                    series: [{
+                        name: 'Volume negociado',
+                        type: 'map',
+                        map: 'world',
+                        roam: true,
+                        emphasis: {
+                            label: { show: true }
+                        },
+                        data: chartData
+                    }]
+                };
+                mapChart.setOption(mapOption, true);
+            }
+
+            function updateLineChart() {
+                const anos = Object.keys(data.EXP).map(Number).sort();
+
+                function getSoma(tipo) {
+                    return anos.map(ano => {
+                        const paises = data[tipo][ano];
+                        const soma = paises.reduce((acc, p) => acc + (p.us_value || 0), 0);
+                        return soma / 1e9;
+                    });
+                }
+
+                const expValores = getSoma('EXP');
+                const impValores = getSoma('IMP');
+                const balValores = getSoma('BAL');
+
+                var lineOption = {
+                    title: {
+                        text: 'Totais por ano',
+                        subtext: 'Bilhões de US$',
+                        left: 'left'
+                    },
+                    grid: {
+                      left: 50,
+                      right: 30,
+                      bottom: 90
+                    },
+                    dataZoom: [
+                        {
+                            type: 'slider', // Cria uma barra de rolagem visual
+                            show: true,
+                            xAxisIndex: [0], // Controla o eixo X
+                            start: 0, // Posição inicial da barra
+                            end: 100, // Posição final da barra
+                            bottom: 10, // Posição na parte inferior do gráfico
+                            height: 30, // Altura da barra de rolagem
+                            backgroundColor: '#f5f5dc', // Cor de fundo da barra (bege claro)
+                            fillerColor: 'rgba(210,192,180,0.5)', // Cor da área selecionada (bege mais escuro)
+                            handleStyle: {
+                                color: '#d2c0b4' // Cor dos puxadores laterais
+                            },
+                            textStyle: {
+                                color: '#333' // Cor do texto do rótulo
+                            }
+                        }
+                    ],
+                    tooltip: {
+                        trigger: 'axis',
+                        // Adiciona uma área retangular amarela ao passar o mouse
+                        axisPointer: {
+                            type: 'shadow',
+                            shadowStyle: {
+                                color: 'rgba(255, 255, 0, 0.1)'
+                            }
+                        },
+                        formatter: function(params) {
+                            let tooltipContent = `<b>Ano ${params[0].name}</b><br/>`;
+                            params.forEach(param => {
+                                const seriesName = param.seriesName;
+                                const value = param.value;
+                                const marker = param.marker;
+                                tooltipContent += `${marker} Total de ${seriesName} do Brasil: US$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})} bi<br/>`;
+                            });
+                            return tooltipContent;
+                        }
+                    },
+                    legend: {
+                        data: ['Exportações', 'Importações', 'Balança Comercial'],
+                        selected: {
+                            'Exportações': true,
+                            'Importações': true,
+                            'Balança Comercial': true
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: anos,
+                        name: 'Série Histórica',
+                        nameLocation: 'middle',
+                        nameGap: 30
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    },
+                    series: [
+                        {
+                            name: 'Exportações',
+                            type: 'line',
+                            data: expValores,
+                            smooth: true,
+                            itemStyle: { color: '#006400' }
+                        },
+                        {
+                            name: 'Importações',
+                            type: 'line',
+                            data: impValores,
+                            smooth: true,
+                            itemStyle: { color: '#FFB6C1' }
+                        },
+                        {
+                            name: 'Balança Comercial',
+                            type: 'line',
+                            data: balValores,
+                            smooth: true,
+                            itemStyle: { color: '#ADD8E6' }
+                        }
+                    ]
+                };
+                lineChart.setOption(lineOption);
+            }
+
+            tipoSelect.addEventListener('change', (event) => {
+                updateMapChart(anoSelecionado, event.target.value);
+            });
+
+            // Adiciona interatividade entre o gráfico de linhas e o mapa
+            lineChart.on('click', function (params) {
+                anoSelecionado = params.name;  // <-- guarda o último ano clicado
+                const tipoAtual = tipoSelect.value;
+                updateMapChart(anoSelecionado, tipoAtual);
+            });
+
+            tipoSelect.addEventListener('change', (event) => {
+                updateMapChart(anoSelecionado, event.target.value);
+            });
+
+            // Chamar as funções pela primeira vez para renderizar os gráficos iniciais
+            updateMapChart(anoSelecionado, 'EXP');
+            updateLineChart();  
+        });
+    });
+
+    window.addEventListener('resize', function() {
+        mapChart.resize();
+        lineChart.resize();
+    });
+
+    mapChart.on('click', function (params) {
+        const countryName = params.name;
+
+        function getCountryData(tipo, country) {
+            const anos = Object.keys(data[tipo]).map(Number).sort();
+            return anos.map(ano => {
+                const countryData = data[tipo][ano].find(p => p.name === country);
+                return countryData ? countryData.us_value / 1e9 : 0;
+            });
+        }
+        
+        const expValoresPais = getCountryData('EXP', countryName);
+        const impValoresPais = getCountryData('IMP', countryName);
+        const balValoresPais = getCountryData('BAL', countryName);
+        const anos = Object.keys(data.EXP).map(Number).sort();
+
+        lineChart.setOption({
+            title: {
+                text: `Histórico da Balança Comercial com ${countryName}`
+            },
+            series: [
+                {
+                    name: 'Exportações',
+                    data: expValoresPais
+                },
+                {
+                    name: 'Importações',
+                    data: impValoresPais
+                },
+                {
+                    name: 'Balança Comercial',
+                    data: balValoresPais
+                }
+            ]
+        });
+    });
+</script>
+</body>
+</html>
