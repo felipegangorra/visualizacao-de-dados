@@ -56,228 +56,237 @@
 
     mapChart.showLoading();
 
-    // Carrega apenas o JSON de exportações/importações (não precisa do world.json local)
-    $.getJSON('BR-exportacoes_importacoes_2025.json', function(data) {
-        mapChart.hideLoading();
+    $.getJSON('world.json', function (geoJson) {
+        echarts.registerMap('world', geoJson);
 
-        const tipoSelect = document.getElementById('tipoSelect');
-        const anoFixo = 2025;
-        let anoSelecionado = 2025;
+        $.getJSON('BR-exportacoes_importacoes_2025.json', function(data) {
+            mapChart.hideLoading();
 
-        function updateMapChart(ano, tipo) {
-            const dataAnual = data[tipo][ano];
-            const chartData = dataAnual
-                .filter(item => item.name)
-                .map(item => ({
-                    name: item.name,
-                    value: item.us_value
-                }));
+            const tipoSelect = document.getElementById('tipoSelect');
+            const anoFixo = 2025;
+            let anoSelecionado = 2025;
 
-            let tituloMapa = '';
-            let visualMapColors = [];
-            let visualMapTitle = '';
-            let visualMapMin = 0;
-            let visualMapMax = 0;
+            function updateMapChart(ano, tipo) {
+                const dataAnual = data[tipo][ano];
+                const chartData = dataAnual
+                    .filter(item => item.name)
+                    .map(item => ({
+                        name: item.name,
+                        value: item.us_value
+                    }));
 
-            const maxVal = Math.max(...chartData.map(d => Math.abs(d.value || 0)));
+                let tituloMapa = '';
+                let visualMapColors = [];
+                let visualMapTitle = '';
+                let visualMapMin = 0;
+                let visualMapMax = 0;
 
-            if (tipo === 'EXP') {
-                tituloMapa = 'Exportações';
-                visualMapColors = ['#E0F3DE', '#A1D99B', '#41AB5D', '#006D2C'];
-                visualMapTitle = 'Volume exportado com o país \n (Bilhões de US$)';
-                visualMapMin = 0;
-                visualMapMax = maxVal;
-            } else if (tipo === 'IMP') {
-                tituloMapa = 'Importações';
-                visualMapColors = ['#fee5d9', '#fcae91', '#fb6a4a', '#cb181d'];
-                visualMapTitle = 'Volume importado com o país \n (Bilhões de US$)';
-                visualMapMin = 0;
-                visualMapMax = maxVal;
-            } else if (tipo === 'BAL') {
-                tituloMapa = 'Balança Comercial';
-                visualMapColors = ['#A50026', '#D73027', '#FEE090', '#E0F3DE', '#41AB5D', '#006837'];
-                visualMapTitle = 'Volume negociado com o país \n (Bilhões de US$)';
-                
-                const maxValAbs = Math.max(...chartData.map(d => Math.abs(d.value)));
-                visualMapMax = maxValAbs;
-                visualMapMin = -maxValAbs;
-            }
+                const maxVal = Math.max(...chartData.map(d => Math.abs(d.value || 0)));
 
-            var mapOption = {
-                title: {
-                    text: `Volume na ${tituloMapa} do Brasil (Ano ${ano})`,
-                    subtext: 'Dados do Monitor do Comércio Exterior Brasileiro',
-                    left: 'center'
-                },
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function(params) {
-                        return params.name + '<br/>US$ ' + (params.value ? (params.value / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' bi' : 'Sem dados');
-                    }
-                },
-                visualMap: {
-                    orient: 'vertical',
-                    left: 'right',
-                    top: 'center',
-                    min: visualMapMin,
-                    max: visualMapMax,
-                    inRange: {
-                        color: visualMapColors
+                if (tipo === 'EXP') {
+                    tituloMapa = 'Exportações';
+                    visualMapColors = ['#E0F3DE', '#A1D99B', '#41AB5D', '#006D2C'];
+                    visualMapTitle = 'Volume exportado com o país \n (Bilhões de US$)';
+                    visualMapMin = 0;
+                    visualMapMax = maxVal;
+                } else if (tipo === 'IMP') {
+                    tituloMapa = 'Importações';
+                    visualMapColors = ['#fee5d9', '#fcae91', '#fb6a4a', '#cb181d'];
+                    visualMapTitle = 'Volume importado com o país \n (Bilhões de US$)';
+                    visualMapMin = 0;
+                    visualMapMax = maxVal;
+                } else if (tipo === 'BAL') {
+                    tituloMapa = 'Balança Comercial';
+                    visualMapColors = ['#A50026', '#D73027', '#FEE090', '#E0F3DE', '#41AB5D', '#006837'];
+                    visualMapTitle = 'Volume negociado com o país \n (Bilhões de US$)';
+                    
+                    const maxValAbs = Math.max(...chartData.map(d => Math.abs(d.value)));
+                    visualMapMax = maxValAbs;
+                    visualMapMin = -maxValAbs;
+                }
+
+                var mapOption = {
+                    title: {
+                        text: `Volume na ${tituloMapa} do Brasil (Ano ${ano})`,
+                        subtext: 'Dados do Monitor do Comércio Exterior Brasileiro',
+                        left: 'center'
                     },
-                    itemHeight: 400,
-                    calculable: true,
-                    text: [visualMapTitle],
-                    textStyle: {
-                        color: '#333',
-                        rotate: 90,
-                        align: 'center',
-                        verticalAlign: 'bottom',
-                        lineHeight: 16
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            return params.name + '<br/>US$ ' + (params.value ? (params.value / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' bi' : 'Sem dados');
+                        }
                     },
-                    formatter: function(value) {
-                        return (value / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-                    }
-                },
-                series: [{
-                    name: 'Volume negociado',
-                    type: 'map',
-                    map: 'world',
-                    roam: true,
-                    emphasis: {
-                        label: { show: true }
-                    },
-                    data: chartData
-                }]
-            };
-            mapChart.setOption(mapOption, true);
-        }
-
-        function updateLineChart() {
-            const anos = Object.keys(data.EXP).map(Number).sort();
-
-            function getSoma(tipo) {
-                return anos.map(ano => {
-                    const paises = data[tipo][ano];
-                    const soma = paises.reduce((acc, p) => acc + (p.us_value || 0), 0);
-                    return soma / 1e9;
-                });
-            }
-
-            const expValores = getSoma('EXP');
-            const impValores = getSoma('IMP');
-            const balValores = getSoma('BAL');
-
-            var lineOption = {
-                title: {
-                    text: 'Totais por ano',
-                    subtext: 'Bilhões de US$',
-                    left: 'left'
-                },
-                grid: {
-                  left: 50,
-                  right: 30,
-                  bottom: 90
-                },
-                dataZoom: [
-                    {
-                        type: 'slider',
-                        show: true,
-                        xAxisIndex: [0],
-                        start: 0,
-                        end: 100,
-                        bottom: 10,
-                        height: 30,
-                        backgroundColor: '#f5f5dc',
-                        fillerColor: 'rgba(210,192,180,0.5)',
-                        handleStyle: {
-                            color: '#d2c0b4'
+                    visualMap: {
+                        orient: 'vertical',
+                        left: 'right',
+                        top: 'center',
+                        min: visualMapMin,
+                        max: visualMapMax,
+                        inRange: {
+                            color: visualMapColors
                         },
+                        itemHeight: 400,
+                        calculable: true,
+                        text: [visualMapTitle],
                         textStyle: {
-                            color: '#333'
-                        }
-                    }
-                ],
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: {
-                        type: 'shadow',
-                        shadowStyle: {
-                            color: 'rgba(255, 255, 0, 0.1)'
+                            color: '#333',
+                            rotate: 90,
+                            align: 'center',
+                            verticalAlign: 'bottom',
+                            lineHeight: 16
+                        },
+                        formatter: function(value) {
+                            return (value / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
                         }
                     },
-                    formatter: function(params) {
-                        let tooltipContent = `<b>Ano ${params[0].name}</b><br/>`;
-                        params.forEach(param => {
-                            const seriesName = param.seriesName;
-                            const value = param.value;
-                            const marker = param.marker;
-                            tooltipContent += `${marker} Total de ${seriesName} do Brasil: US$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})} bi<br/>`;
-                        });
-                        return tooltipContent;
-                    }
-                },
-                legend: {
-                    data: ['Exportações', 'Importações', 'Balança Comercial'],
-                    selected: {
-                        'Exportações': true,
-                        'Importações': true,
-                        'Balança Comercial': true
-                    }
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: anos,
-                    name: 'Série Histórica',
-                    nameLocation: 'middle',
-                    nameGap: 30
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLabel: {
-                        formatter: '{value}'
-                    }
-                },
-                series: [
-                    {
-                        name: 'Exportações',
-                        type: 'line',
-                        data: expValores,
-                        smooth: true,
-                        itemStyle: { color: '#006400' }
+                    series: [{
+                        name: 'Volume negociado',
+                        type: 'map',
+                        map: 'world',
+                        roam: true,
+                        emphasis: {
+                            label: { show: true }
+                        },
+                        data: chartData
+                    }]
+                };
+                mapChart.setOption(mapOption, true);
+            }
+
+            function updateLineChart() {
+                const anos = Object.keys(data.EXP).map(Number).sort();
+
+                function getSoma(tipo) {
+                    return anos.map(ano => {
+                        const paises = data[tipo][ano];
+                        const soma = paises.reduce((acc, p) => acc + (p.us_value || 0), 0);
+                        return soma / 1e9;
+                    });
+                }
+
+                const expValores = getSoma('EXP');
+                const impValores = getSoma('IMP');
+                const balValores = getSoma('BAL');
+
+                var lineOption = {
+                    title: {
+                        text: 'Totais por ano',
+                        subtext: 'Bilhões de US$',
+                        left: 'left'
                     },
-                    {
-                        name: 'Importações',
-                        type: 'line',
-                        data: impValores,
-                        smooth: true,
-                        itemStyle: { color: '#FFB6C1' }
+                    grid: {
+                      left: 50,
+                      right: 30,
+                      bottom: 90
                     },
-                    {
-                        name: 'Balança Comercial',
-                        type: 'line',
-                        data: balValores,
-                        smooth: true,
-                        itemStyle: { color: '#ADD8E6' }
-                    }
-                ]
-            };
-            lineChart.setOption(lineOption);
-        }
+                    dataZoom: [
+                        {
+                            type: 'slider', // Cria uma barra de rolagem visual
+                            show: true,
+                            xAxisIndex: [0], // Controla o eixo X
+                            start: 0, // Posição inicial da barra
+                            end: 100, // Posição final da barra
+                            bottom: 10, // Posição na parte inferior do gráfico
+                            height: 30, // Altura da barra de rolagem
+                            backgroundColor: '#f5f5dc', // Cor de fundo da barra (bege claro)
+                            fillerColor: 'rgba(210,192,180,0.5)', // Cor da área selecionada (bege mais escuro)
+                            handleStyle: {
+                                color: '#d2c0b4' // Cor dos puxadores laterais
+                            },
+                            textStyle: {
+                                color: '#333' // Cor do texto do rótulo
+                            }
+                        }
+                    ],
+                    tooltip: {
+                        trigger: 'axis',
+                        // Adiciona uma área retangular amarela ao passar o mouse
+                        axisPointer: {
+                            type: 'shadow',
+                            shadowStyle: {
+                                color: 'rgba(255, 255, 0, 0.1)'
+                            }
+                        },
+                        formatter: function(params) {
+                            let tooltipContent = `<b>Ano ${params[0].name}</b><br/>`;
+                            params.forEach(param => {
+                                const seriesName = param.seriesName;
+                                const value = param.value;
+                                const marker = param.marker;
+                                tooltipContent += `${marker} Total de ${seriesName} do Brasil: US$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})} bi<br/>`;
+                            });
+                            return tooltipContent;
+                        }
+                    },
+                    legend: {
+                        data: ['Exportações', 'Importações', 'Balança Comercial'],
+                        selected: {
+                            'Exportações': true,
+                            'Importações': true,
+                            'Balança Comercial': true
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: anos,
+                        name: 'Série Histórica',
+                        nameLocation: 'middle',
+                        nameGap: 30
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    },
+                    series: [
+                        {
+                            name: 'Exportações',
+                            type: 'line',
+                            data: expValores,
+                            smooth: true,
+                            itemStyle: { color: '#006400' }
+                        },
+                        {
+                            name: 'Importações',
+                            type: 'line',
+                            data: impValores,
+                            smooth: true,
+                            itemStyle: { color: '#FFB6C1' }
+                        },
+                        {
+                            name: 'Balança Comercial',
+                            type: 'line',
+                            data: balValores,
+                            smooth: true,
+                            itemStyle: { color: '#ADD8E6' }
+                        }
+                    ]
+                };
+                lineChart.setOption(lineOption);
+            }
 
-        tipoSelect.addEventListener('change', (event) => {
-            updateMapChart(anoSelecionado, event.target.value);
+            tipoSelect.addEventListener('change', (event) => {
+                updateMapChart(anoSelecionado, event.target.value);
+            });
+
+            // Adiciona interatividade entre o gráfico de linhas e o mapa
+            lineChart.on('click', function (params) {
+                anoSelecionado = params.name;  // <-- guarda o último ano clicado
+                const tipoAtual = tipoSelect.value;
+                updateMapChart(anoSelecionado, tipoAtual);
+            });
+
+            tipoSelect.addEventListener('change', (event) => {
+                updateMapChart(anoSelecionado, event.target.value);
+            });
+
+            // Chamar as funções pela primeira vez para renderizar os gráficos iniciais
+            updateMapChart(anoSelecionado, 'EXP');
+            updateLineChart();  
         });
-
-        lineChart.on('click', function (params) {
-            anoSelecionado = params.name;
-            const tipoAtual = tipoSelect.value;
-            updateMapChart(anoSelecionado, tipoAtual);
-        });
-
-        // Renderização inicial
-        updateMapChart(anoSelecionado, 'EXP');
-        updateLineChart();
     });
 
     window.addEventListener('resize', function() {
@@ -322,6 +331,5 @@
         });
     });
 </script>
-
 </body>
 </html>
